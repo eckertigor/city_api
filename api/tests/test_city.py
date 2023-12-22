@@ -92,7 +92,7 @@ def test_get_all_cities(mocker):
     assert len(response.json()['data']) == 3
 
 
-def test_get_endpoint(mocker):
+def test_get_city(mocker):
     db_city_berlin = models.City(
         uuid='778b98a5-6482-4856-b812-17039ded49a9',
         name='Berlin',
@@ -187,7 +187,7 @@ def test_update_city(mocker):
     assert response.status_code == 404
 
 
-def test_delete_endpoint(mocker):
+def test_delete_city(mocker):
     mocker.patch("api.db.delete_city", return_value=True)
     response = client.delete("/city/1")
     assert response.status_code == 204

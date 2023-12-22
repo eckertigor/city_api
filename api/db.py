@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, and_
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.orm import sessionmaker, Session
@@ -52,6 +52,8 @@ def create_city(session: Session, city: schema.CityInput):
     )
     for ally in city.data.allied_cities:
         ally_db = get_city(session, ally)
+        if not ally_db:
+            return
         db_city.allied_cities.append(ally_db)
         ally_db.allied_cities.append(db_city)
     session.add(db_city)
@@ -93,6 +95,8 @@ def update_city(session: Session,
 
 def delete_city(session: Session, city_uuid: str):
     city = get_city(session=session, uuid=city_uuid)
+    if city is None:
+        return None
     allied_cities = [ally.uuid for ally in city.allied_cities]
     for ally in allied_cities:
         ally_db = get_city(session, ally)

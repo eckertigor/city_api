@@ -1,7 +1,7 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 from api.models import City
-from pydantic import BaseModel, field_validator, UUID4, Field
-
+from pydantic import BaseModel, field_validator, UUID4
+from utils import get_ally_power
 
 class CityData(BaseModel):
     city_uuid: UUID4
@@ -11,6 +11,10 @@ class CityData(BaseModel):
     beauty: str
     population: int
     allied_cities: List[UUID4]
+
+
+class CityPowerData(CityData):
+    power: int
 
 
 class CityDataInput(BaseModel):
@@ -79,6 +83,13 @@ class CityResponse(BaseModel):
         orm_mode = True
 
 
+class CityPowerResponse(BaseModel):
+    data: CityPowerData
+
+    class Config:
+        orm_mode = True
+
+
 def city_model_to_response(city: City) -> CityData:
     data = CityData(
         city_uuid=city.uuid,
@@ -88,6 +99,26 @@ def city_model_to_response(city: City) -> CityData:
         beauty=city.beauty,
         population=city.population,
         allied_cities=[ally.uuid for ally in city.allied_cities]
+    )
+    return data
+
+
+def city_model_to_power_response(city: City) -> CityPowerData:
+    power = city.population
+    for ally in city.allied_cities:
+        ally_latitude = ally.geo_location_latitude
+        ally_longitude = ally.geo_location_longitude
+        power += get_ally_power((city.geo_location_latitude, city.geo_location_longitude),
+                        (ally_latitude, ally_longitude), ally.population)
+    data = CityPowerData(
+        city_uuid=city.uuid,
+        name=city.name,
+        geo_location_latitude=city.geo_location_latitude,
+        geo_location_longitude=city.geo_location_longitude,
+        beauty=city.beauty,
+        population=city.population,
+        allied_cities=[ally.uuid for ally in city.allied_cities],
+        power=power
     )
     return data
 

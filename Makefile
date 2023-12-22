@@ -31,7 +31,7 @@ shell: ## Open a bash shell on a python-fastapi container
 ##
 .PHONY: test
 test: ## Shortcut to launch all the test tasks (unit, functional and integration).
-		$(DOCKER_COMPOSE) run -p 1337:1337 app python -m pytest api/tests/ -v
+		$(DOCKER_COMPOSE) run -p 1337:1337 app python -m pytest api/tests/ -v --disable-pytest-warnings
 
 .PHONY: clean
 clean: ## Remove containers

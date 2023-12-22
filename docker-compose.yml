@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  app:
+    image: city-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: city-api
+    command: python api/main.py
+    ports:
+      - "1337:1337"
+    environment:
+      APP_ENV: production
+    restart: always
+    depends_on:
+      - db
+  db:
+    image: "mdillon/postgis:11-alpine"
+    labels:
+      - city-api-db
+    volumes:
+      - type: volume
+        source: pg-data
+        target: /var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    hostname: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "city_api_user", "-d", "city_api" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    environment:
+      POSTGRES_DB: city_api
+      POSTGRES_USER: city_api_user
+      POSTGRES_PASSWORD: city_api_password
+
+
+volumes:
+  pg-data:
